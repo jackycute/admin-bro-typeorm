@@ -29,9 +29,14 @@ export function convertFilter(filter?: Filter): FindConditions<BaseEntity> {
       // when comes to reference TypeORM cannot filter by referenceId: YOUR_FILTER_VALUE
       // I don't know why. But it filters by an object: reference: {id: YOUR_FILTER_VALUE}
       // propertyPath holds `reference.id` that is why we split it by `.`
-      const [column, key] = (one.property as Property).column.propertyPath.split('.')
-      where[column] = {
-        [key]: one.value,
+      const paths = (one.property as Property).column.propertyPath.split('.')
+      if (paths.length > 1) {
+        const [column, key] = paths
+        where[column] = {
+          [key]: one.value,
+        }
+      } else {
+        where[paths[0]] = one.value
       }
     } else {
       where[n] = Like(`%${one.value}%`)
